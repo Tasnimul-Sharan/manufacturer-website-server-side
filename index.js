@@ -150,6 +150,13 @@ async function run() {
       );
       res.send({ result, token });
     });
+
+    app.delete("/orders/:email", async (req, res) => {
+      const email = req.params.email;
+      const filter = { email: email };
+      const result = await orderCollection.deleteOne(filter);
+      res.send(result);
+    });
   } finally {
   }
 }
