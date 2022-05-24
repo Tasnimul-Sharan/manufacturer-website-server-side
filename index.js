@@ -109,6 +109,12 @@ async function run() {
       res.send(result);
     });
 
+    app.post("/parts", async (req, res) => {
+      const parts = req.body;
+      const result = await partCollection.insertOne(parts);
+      res.send(result);
+    });
+
     app.post("/orders", async (req, res) => {
       const myOrder = req.body;
       const result = await orderCollection.insertOne(myOrder);
