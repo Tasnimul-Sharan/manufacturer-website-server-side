@@ -106,6 +106,24 @@ async function run() {
       res.send({ admin: isAdmin });
     });
 
+    app.patch("/booking/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const updateDoc = {
+        $set: {
+          paid: true,
+          transactionId: payment.transactionId,
+        },
+      };
+      const result = await paymentCollection.insertOne(payment);
+      const updateBooking = await bookingCollection.updateOne(
+        filter,
+        updateDoc
+      );
+      res.send(updateDoc);
+    });
+
     app.patch("/orders/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const payment = req.body;
@@ -118,7 +136,7 @@ async function run() {
       };
       const result = await paymentCollection.insertOne(payment);
       const updateOrder = await orderCollection.updateOne(filter, updateDoc);
-      res.send(updateDoc);
+      res.send({ updateDoc });
     });
 
     app.put("/profile", async (req, res) => {
@@ -145,12 +163,14 @@ async function run() {
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const parts = req.body;
       const price = parts.price;
+      console.log(price);
       const amount = price * 100;
       const paymentIntent = await stripe.paymentIntents.create({
         amount: amount,
         currency: "usd",
         payment_method_types: ["card"],
       });
+      //   console.log(clientSecret);
       res.send({ clientSecret: paymentIntent?.client_secret });
     });
 
