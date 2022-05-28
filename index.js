@@ -86,6 +86,11 @@ async function run() {
       res.send(users);
     });
 
+    app.get("/allOrders", verifyJWT, verifyAdmin, async (req, res) => {
+      const allOrderss = await orderCollection.find().toArray();
+      res.send(allOrderss);
+    });
+
     app.get("/orders", verifyJWT, async (req, res) => {
       const decodedEmail = req.decoded.email;
       const email = req.query.email;
@@ -121,27 +126,6 @@ async function run() {
       res.send({ updateDoc });
     });
 
-    app.put("/profile", async (req, res) => {
-      const id = req.params.id;
-      const profile = req.body;
-      const filter = { _id: ObjectId(id) };
-      const options = { upsert: true };
-      const updateDoc = {
-        $set: {
-          education: profile.education,
-          location: profile.location,
-          phoneNumber: profile.phoneNumber,
-          profileLink: profile.profileLink,
-        },
-      };
-      const result = await profileCollection.updateOne(
-        filter,
-        updateDoc,
-        options
-      );
-      res.send(result);
-    });
-
     app.post("/create-payment-intent", verifyJWT, async (req, res) => {
       const parts = req.body;
       const price = parts.price;
@@ -152,18 +136,12 @@ async function run() {
         currency: "usd",
         payment_method_types: ["card"],
       });
-      //   console.log(clientSecret);
       res.send({ clientSecret: paymentIntent?.client_secret });
     });
 
     app.post("/parts", async (req, res) => {
       const parts = req.body;
       const result = await partCollection.insertOne(parts);
-      res.send(result);
-    });
-    app.post("/profile", async (req, res) => {
-      const profile = req.body;
-      const result = await profileCollection.insertOne(profile);
       res.send(result);
     });
 
@@ -179,6 +157,27 @@ async function run() {
       res.send(result);
     });
 
+    app.patch("/payments/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const payment = req.body;
+      const filter = { _id: ObjectId(id) };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          paid: true,
+          status: "shipped",
+          // shipped: true,
+        },
+      };
+      // const result = await paymentCollection.insertOne(payment);
+      const updateOrder = await orderCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
+      res.send({ updateDoc });
+    });
+
     app.put("/user/admin/:email", verifyJWT, verifyAdmin, async (req, res) => {
       const email = req.params.email;
 
@@ -189,6 +188,28 @@ async function run() {
       };
       const result = await userCollection.updateOne(filter, updateDoc);
 
+      res.send(result);
+    });
+
+    app.put("/profile/:email", async (req, res) => {
+      const email = req.params.email;
+      const profile = req.body;
+      const filter = { email: email };
+      const options = { upsert: true };
+      const updateDoc = {
+        $set: {
+          name: profile.name,
+          education: profile.education,
+          location: profile.location,
+          phoneNumber: profile.phoneNumber,
+          profileLink: profile.profileLink,
+        },
+      };
+      const result = await profileCollection.updateOne(
+        filter,
+        updateDoc,
+        options
+      );
       res.send(result);
     });
 
@@ -216,7 +237,14 @@ async function run() {
       res.send(result);
     });
 
-    app.delete("/orders/:email", async (req, res) => {
+    app.delete("/allOrders/:id", verifyJWT, async (req, res) => {
+      const id = req.params.id;
+      const query = { _id: ObjectId(id) };
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
+    });
+
+    app.delete("/orders/:email", verifyJWT, async (req, res) => {
       const email = req.params.email;
       const filter = { email: email };
       const result = await orderCollection.deleteOne(filter);
