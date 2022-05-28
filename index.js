@@ -165,11 +165,11 @@ async function run() {
       const updateDoc = {
         $set: {
           paid: true,
+          pending: payment.pending,
           status: "shipped",
           // shipped: true,
         },
       };
-      // const result = await paymentCollection.insertOne(payment);
       const updateOrder = await orderCollection.updateOne(
         filter,
         updateDoc,
