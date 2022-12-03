@@ -167,7 +167,6 @@ async function run() {
           paid: true,
           pending: payment.pending,
           status: "shipped",
-          // shipped: true,
         },
       };
       const updateOrder = await orderCollection.updateOne(
@@ -230,7 +229,7 @@ async function run() {
       res.send({ result, token });
     });
 
-    app.delete("/parts/:id", async (req, res) => {
+    app.delete("/parts/:id", verifyJWT, async (req, res) => {
       const id = req.params.id;
       const query = { _id: ObjectId(id) };
       const result = await partCollection.deleteOne(query);
