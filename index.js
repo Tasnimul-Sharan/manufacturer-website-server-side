@@ -256,6 +256,7 @@ run().catch(console.dir);
 app.get("/", (req, res) => {
   res.send("Manufacturer Website server");
 });
+
 app.listen(port, () => {
   console.log(`Manufacturer website running on ${port}`);
 });
