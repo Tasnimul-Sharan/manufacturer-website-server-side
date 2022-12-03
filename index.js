@@ -4,7 +4,6 @@ const cors = require("cors");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
 const jwt = require("jsonwebtoken");
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
-console.log(process.env.STRIPE_SECRET_KEY);
 const app = express();
 const port = process.env.PORT || 5005;
 
