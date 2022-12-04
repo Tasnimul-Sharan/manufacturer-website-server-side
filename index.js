@@ -260,3 +260,5 @@ app.get("/", (req, res) => {
 app.listen(port, () => {
   console.log(`Manufacturer website running on ${port}`);
 });
+
+module.exports = app;
